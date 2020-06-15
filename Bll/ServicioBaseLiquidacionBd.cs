@@ -37,7 +37,6 @@ namespace Bll
             }
 
         }
-
         public RespuestaConsulta<BaseLiquidacion> Consultar()
         {
             RespuestaConsulta<BaseLiquidacion> respuesta = new RespuestaConsulta<BaseLiquidacion>();
@@ -75,7 +74,7 @@ namespace Bll
             try
             {
                 connectionManager.Open();
-                IList<BaseLiquidacion> baseLiquidaciones = baseLiquidacionDbRepositorio.ConsultarPorNickYFecha(nick,año,mes);
+                IList<BaseLiquidacion> baseLiquidaciones = baseLiquidacionDbRepositorio.ConsultarPorNickYFecha(nick, año, mes);
                 connectionManager.Close();
                 if (baseLiquidaciones.Count > 0)
                 {
@@ -98,6 +97,42 @@ namespace Bll
             {
                 connectionManager.Close();
             }
+        }
+
+        public RespuestaConsulta<BaseLiquidacion> ConsultarFecha(int año, int mes)
+        {
+            RespuestaConsulta<BaseLiquidacion> respuesta = new RespuestaConsulta<BaseLiquidacion>();
+            try
+            {
+                connectionManager.Open();
+                IList<BaseLiquidacion> baseLiquidaciones = baseLiquidacionDbRepositorio.ConsultarPorFecha(año, mes);
+                connectionManager.Close();
+                if (baseLiquidaciones.Count > 0)
+                {
+                    respuesta.mensaje = "consulta realizada";
+                    respuesta.ElementoConsultado = baseLiquidaciones;
+                }
+                else
+                {
+                    respuesta.ElementoConsultado = baseLiquidaciones;
+                    respuesta.mensaje = "no hay datos en la lista ";
+                }
+                return respuesta;
+            }
+            catch (Exception e)
+            {
+                respuesta.mensaje = $"error :  {e.Message}";
+                return respuesta;
+            }
+            finally
+            {
+                connectionManager.Close();
+            }
+        }
+
+        public decimal TotalizarPorEstapilla(IList<BaseLiquidacion> baseLiquidaciones, string estampilla)
+        {
+            return baseLiquidacionDbRepositorio.TotalizarPorEstapilla(baseLiquidaciones, estampilla);
         }
     }
 }

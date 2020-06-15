@@ -32,26 +32,26 @@ namespace Dal
             }
 
         }
-            public IList<BaseLiquidacion> Consultar()
+        public IList<BaseLiquidacion> Consultar()
+        {
+            SqlDataReader dataReader;
+            List<BaseLiquidacion> reporteBaseLiquidacion = new List<BaseLiquidacion>();
+            using (SqlCommand command = _connection.CreateCommand())
             {
-                SqlDataReader dataReader;
-                List<BaseLiquidacion> reporteBaseLiquidacion = new List<BaseLiquidacion>();
-                using (SqlCommand command = _connection.CreateCommand())
+                command.CommandText = "Select * from base_liquidacion";
+                dataReader = command.ExecuteReader();
+                if (dataReader.HasRows)
                 {
-                    command.CommandText = "Select * from base_liquidacion";
-                    dataReader = command.ExecuteReader();
-                    if (dataReader.HasRows)
+                    while (dataReader.Read())
                     {
-                        while (dataReader.Read())
-                        {
-                            BaseLiquidacion baseLiquidacion = MapearBaseLiquidacion(dataReader);
-                            reporteBaseLiquidacion.Add(baseLiquidacion); 
-                        }
+                        BaseLiquidacion baseLiquidacion = MapearBaseLiquidacion(dataReader);
+                        reporteBaseLiquidacion.Add(baseLiquidacion);
                     }
                 }
-                return reporteBaseLiquidacion;
             }
-        public IList<BaseLiquidacion> ConsultarPorNickYFecha(string nick, int año,int mes)
+            return reporteBaseLiquidacion;
+        }
+        public IList<BaseLiquidacion> ConsultarPorNickYFecha(string nick, int año, int mes)
         {
             SqlDataReader dataReader;
             List<BaseLiquidacion> reporteBaseLiquidacion = new List<BaseLiquidacion>();
@@ -73,6 +73,40 @@ namespace Dal
                 }
             }
             return reporteBaseLiquidacion;
+        }
+        public IList<BaseLiquidacion> ConsultarPorFecha(int año, int mes)
+        {
+            SqlDataReader dataReader;
+            List<BaseLiquidacion> reporteBaseLiquidacion = new List<BaseLiquidacion>();
+            using (SqlCommand command = _connection.CreateCommand())
+            {
+                command.CommandText = @"select * from BASE_LIQUIDACION
+                                    WHERE  mes = @mes AND año = @año;";
+                command.Parameters.AddWithValue("@mes", mes);
+                command.Parameters.AddWithValue("@año", año);
+                dataReader = command.ExecuteReader();
+                if (dataReader.HasRows)
+                {
+                    while (dataReader.Read())
+                    {
+                        BaseLiquidacion baseLiquidacion = MapearBaseLiquidacion(dataReader);
+                        reporteBaseLiquidacion.Add(baseLiquidacion);
+                    }
+                }
+            }
+            return reporteBaseLiquidacion;
+        }
+        public decimal TotalizarPorEstapilla(IList<BaseLiquidacion> baseLiquidaciones, string estampilla)
+        {
+            decimal sumatoria = 0;
+            foreach (var item in baseLiquidaciones)
+            {
+                if (item.Servicio.NombreServicio.Equals(estampilla))
+                {
+                    sumatoria = sumatoria + item.Servicio.ValorRecaudo;
+                }
+            }
+            return sumatoria;
         }
         public BaseLiquidacion MapearBaseLiquidacion(SqlDataReader dataReader)
             {
